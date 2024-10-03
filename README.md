@@ -1,6 +1,5 @@
 # IOT-SIMALAS
 <h3 align="left">Conten:</h3>
-<h3 align="left">-Backend</h3>
-<h3 align="left">-Frontend</h3>
-<h3 align="left">-Hardware</h3>
-   
+<h3 style="margin-left: 10px;">- Backend</h3>
+<h3 style="margin-left: 10px;">- Frontend</h3>
+<h3 style="margin-left: 10px;">- Hardware</h3>
