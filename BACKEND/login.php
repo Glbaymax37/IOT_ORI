@@ -5,7 +5,7 @@ include("classes/connect.php");
 include("classes/login.php");
 
 $NIM = "";
-$Password = "";
+$Password = "pemai";
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $login = new Login();
