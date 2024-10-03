@@ -1,6 +1,9 @@
 # IOT-SIMALAS
-<h3 align="left">Conten:</h3>
-<h3 style="margin-left: 10px;">- Backend</h3>
-<h3 style="margin-left: 10px;">- Frontend</h3>
-<h3 style="margin-left: 10px;">- Hardware</h3>
+# [Backend](https://github.com/username/my-project)
+
+IOT Project! 
+
+## Features
+- Feature 1
+- Feature 2
 
