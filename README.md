@@ -1,9 +1,6 @@
 # IOT-SIMALAS
-# [Backend](https://github.com/username/my-project)
-
-IOT Project! 
-
-## Features
-- Feature 1
-- Feature 2
+  
+  Content
+- [Frontend](https://github.com/username/my-project)
+- [Backend](https://github.com/Glbaymax37/IOT-SIMALAS/tree/main/BACKEND)
 
