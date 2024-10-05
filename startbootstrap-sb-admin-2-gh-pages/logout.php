@@ -7,7 +7,7 @@ session_unset();
 // Hancurkan session
 session_destroy();
 
-// Redirect ke halaman login atau halaman lain
-header("Location: login2.php");
+// Redirect ke halaman login
+header("Location: login.php");
 exit();
-
+?>

@@ -24,6 +24,7 @@ class Login
                 $_SESSION['simalas_userid'] = $row['userid'];
                 $_SESSION['simalas_nama'] = $row['Nama'];
                 $_SESSION['simalas_NIM'] = $row['NIM'];
+                $_SESSION['simalas_email'] = $row['email'];
                 $_SESSION['simalas_PBL'] = $row['PBL'];
                 $_SESSION['simalas_Tanggal'] = $row['Tanggal'];
             } else {
