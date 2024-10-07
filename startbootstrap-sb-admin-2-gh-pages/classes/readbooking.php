@@ -1,17 +1,17 @@
 <?php
 
-class Login
+class Check
 {
     private $error = "";
 
     public function evaluate($data)
     {
-        
-        $NIM = addslashes($data['NIM']);
+        $Nama = addslashes($data['Nama']); 
+        $NIM = addslashes($data['NIM']); 
         $Password = addslashes($data['Password']);
 
-        $query = "SELECT * FROM user WHERE NIM = '$NIM' LIMIT 1";
-        
+        $query = "SELECT * FROM Booking WHERE Nama = '$Nama' LIMIT 1";
+
        
         $DB = new Database();
         $result = $DB->read($query);
@@ -20,22 +20,13 @@ class Login
         if ($result) {
             $row = $result[0];
 
-            if (password_verify($Password, $row['Password'])) {
-                $_SESSION['simalas_userid'] = $row['userid'];
                 $_SESSION['simalas_nama'] = $row['Nama'];
                 $_SESSION['simalas_NIM'] = $row['NIM'];
-                $_SESSION['simalas_email'] = $row['email'];
                 $_SESSION['simalas_PBL'] = $row['PBL'];
-                $_SESSION['simalas_Tanggal'] = $row['Tanggal'];
-            } else {
-                $this->error = "Wrong password<br>";
-            }
-           
-        } else {
-           
-            $this->error = "No such NIM was found<br>";
+                $_SESSION['tanggal_booking'] = $row['Tanggal'];
+                $_SESSION['jam_booking'] = $row['JamBooking'];
+                $_SESSION['simalas_PBL'] = $row['JamSelesai'];
         }
-
         return $this->error;
     }
     
@@ -44,6 +35,7 @@ class Login
         $query =  "SELECT * FROM user WHERE userid = '$id' LIMIT 1";
        
         
+  
         $DB = new Database();
         $result = $DB->read($query);
 
