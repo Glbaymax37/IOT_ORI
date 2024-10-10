@@ -10,6 +10,7 @@ $useremail = $_SESSION["simalas_email"];
 include("classes/connect.php");
 include("classes/login.php");
 include("classes/createbooking.php");
+include("classes/sensor_data.php");
 
 if(isset($_SESSION["simalas_userid"])&& is_numeric($_SESSION["simalas_userid"]))
 {
@@ -22,6 +23,9 @@ if(isset($_SESSION["simalas_userid"])&& is_numeric($_SESSION["simalas_userid"]))
     
     $booking = new Booking(); 
     $bookings = $booking->bookingByuser();
+
+    $data_monitoring = new ESPData();
+    $data_hasil = $data_monitoring -> getSensorDataBySessionUser();
 
     if($result){
        
@@ -249,7 +253,12 @@ else{
                                             <div class="col mr-2">
                                                 <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                                                     Temperature</div>
-                                                <div class="h5 mb-0 font-weight-bold text-gray-800">32&deg;C</div>
+                                                <div class="h5 mb-0 font-weight-bold text-gray-800"> 
+                                                <?php if (!empty($data_hasil['suhu'])): ?>
+                                                <?php echo $data_hasil['suhu'] ?>&deg;C
+                                                <?php else: ?>
+                                                            Tidak ada data suhu
+                                                <?php endif; ?></div>
                                             </div>
                                             <div class="col-auto">
                                                 <i class="fas fa-temperature-low fa-2x text-gray-300"></i>
@@ -268,7 +277,12 @@ else{
                                             <div class="col mr-2">
                                                 <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                                                     Current</div>
-                                                <div class="h5 mb-0 font-weight-bold text-gray-800">5 A</div>
+                                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                <?php if (!empty($data_hasil['arus'])): ?>
+                                                <?php echo $data_hasil['arus'] ?> A
+                                                <?php else: ?>
+                                                            Tidak ada data arus
+                                                <?php endif; ?></div>
                                             </div>
                                             <div class="col-auto">
                                                 <i class="fas fa-plug fa-2x text-gray-300"></i>
@@ -321,7 +335,14 @@ else{
                                         <div class="col mr-2">
                                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                                 Voltage</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">220&nbsp;V</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">    
+                                                <?php if (!empty($data_hasil['tegangan'])): ?>
+                                                <?php echo $data_hasil['tegangan'] ?> &nbsp;V
+                                                <?php else: ?>
+                                                            Tidak ada data tegangan
+                                                <?php endif; ?>
+                                               
+                                            </div>
                                         </div>
                                         <div class="col-auto">
                                             <i class="fas fa-bolt fa-2x text-gray-300"></i>
@@ -339,7 +360,12 @@ else{
                                         <div class="col mr-2">
                                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                                 Humidity</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">75%</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800"> 
+                                                <?php if (!empty($data_hasil['kelembapan'])): ?>
+                                                <?php echo $data_hasil['kelembapan'] ?> %
+                                                <?php else: ?>
+                                                            Tidak ada data Kelembapan
+                                                <?php endif; ?></div>
                                         </div>
                                         <div class="col-auto">
                                             <i class="fas fa-wind fa-2x text-gray-300"></i>
