@@ -10,6 +10,7 @@ $useremail = $_SESSION["simalas_email"];
 include("classes/connect.php");
 include("classes/login.php");
 include("classes/createbooking.php");
+include("classes/sensor_data.php");
 
 if(isset($_SESSION["simalas_userid"])&& is_numeric($_SESSION["simalas_userid"]))
 {
@@ -22,6 +23,12 @@ if(isset($_SESSION["simalas_userid"])&& is_numeric($_SESSION["simalas_userid"]))
     
     $booking = new Booking(); 
     $bookings = $booking->bookingByuser();
+
+    
+    $data_monitoring = new ESPData();
+    $data_hasil = $data_monitoring -> getSensorDataBySessionUser();
+
+    
 
     if($result){
        
@@ -328,32 +335,64 @@ else{
 
                         <script>
                             document.addEventListener("DOMContentLoaded", function () {
-                                var buttonElement = document.getElementById("actionButton");
+                            var buttonElement = document.getElementById("actionButton");
 
-                                function updateClock() {
-                                    var now = new Date();
-                                    var hours = now.getHours();
-                                    var minutes = now.getMinutes();
+                        // Fungsi untuk memperbarui jam
+                        function updateClock() {
+                            var now = new Date();
+                            var hours = now.getHours();
+                            var minutes = now.getMinutes();
 
-                                    console.log("Current Time:", hours, minutes); // Menampilkan waktu saat ini
+                            console.log("Current Time:", hours, minutes); // Menampilkan waktu saat ini
 
-                                    var startHour = <?php echo $jamMulai?>;    
-                                    var startMinute =<?php echo $menitMulai?>;  
-                                    var endHour = <?php echo $jamUsai?>;     
-                                    var endMinute = <?php echo $menitSelesai?>;    
+                            // Mendapatkan waktu mulai dan selesai dari PHP
+                            var startHour = <?php echo $jamMulai ?>;    
+                            var startMinute = <?php echo $menitMulai ?>;  
+                            var endHour = <?php echo $jamUsai ?>;     
+                            var endMinute = <?php echo $menitSelesai ?>;    
 
-                                    // Aktifkan atau nonaktifkan tombol berdasarkan waktu
-                                    if ((hours > startHour || (hours === startHour && minutes >= startMinute)) &&
-                                        (hours < endHour || (hours === endHour && minutes < endMinute))) {
-                                        buttonElement.disabled = false; // Aktif
-                                        var_dump(buttonElement);
-                                    } else {
-                                        buttonElement.disabled = true; 
-                                       
-                                    }
+                            // Aktifkan atau nonaktifkan tombol berdasarkan waktu
+                            if ((hours > startHour || (hours === startHour && minutes >= startMinute)) &&
+                                (hours < endHour || (hours === endHour && minutes < endMinute))) {
+                                buttonElement.disabled = false; // Aktif
+                            } else {
+                                buttonElement.disabled = true; // Nonaktif
+                            }
+                        }
+
+                            // Menambahkan event listener ke tombol
+                            buttonElement.addEventListener("click", function () {
+                                if (!buttonElement.disabled) { // Pastikan tombol aktif
+                                    alert("Mesin diaktifkan");
+                                    
+                                    // Menggunakan AJAX untuk memindahkan data
+                                    var xhr = new XMLHttpRequest();
+                                    xhr.open("POST", "move_data.php", true);
+                                    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+                                    xhr.onreadystatechange = function () {
+                                        if (xhr.readyState === XMLHttpRequest.DONE) {
+                                            try {
+                                                var response = JSON.parse(xhr.responseText);
+                                                if (response.status === "success") {
+                                                    location.reload(); 
+                                                } else {
+                                                   
+                                                }
+                                            } catch (e) {
+                                                console.error("Error parsing JSON:", e);
+                                            }
+                                        }
+                                    };
+
+                                
+                                    xhr.send(); 
                                 }
-                                setInterval(updateClock, 1000);
                             });
+
+                            // Memperbarui jam setiap detik
+                            setInterval(updateClock, 1000);
+                        });
                         </script>
 
                         <style>
@@ -379,7 +418,13 @@ else{
                                         <div class="col mr-2">
                                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                                                 Temperature</div>
-                                                <div class="h5 mb-0 font-weight-bold text-gray-800">32&deg;C</div>
+                                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                <?php if (!empty($data_hasil['suhu'])): ?>
+                                                <?php echo $data_hasil['suhu'] ?>&deg;C
+                                                <?php else: ?>
+                                                            Tidak ada data suhu
+                                                <?php endif; ?>
+                                                </div>
                                         </div>
                                         <div class="col-auto">
                                             <i class="fas fa-temperature-low fa-2x text-gray-300" ></i></i>
@@ -397,7 +442,13 @@ else{
                                         <div class="col mr-2">
                                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
                                                 Voltage</div>
-                                                <div class="h5 mb-0 font-weight-bold text-gray-800">220&nbsp;V</div>
+                                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                <?php if (!empty($data_hasil['tegangan'])): ?>
+                                                <?php echo $data_hasil['tegangan'] ?>&nbsp;V
+                                                <?php else: ?>
+                                                            Tidak ada data Tegangan
+                                                <?php endif; ?>
+                                                </div>
                                         </div>
                                         <div class="col-auto">
                                             <i class="fas fa-bolt fa-2x text-gray-300"></i>
@@ -421,7 +472,7 @@ else{
 
                                                 </div>
                                                 <div class="col">
-                                                    <div class="progress progress-sm mr-2">
+                                                    <div class="progress progress-sm mr-2"style="margin-left: 10px;">
                                                         <div class="progress-bar bg-info" role="progressbar"
                                                             style="width: 50%" aria-valuenow="50" aria-valuemin="0"
                                                             aria-valuemax="100"></div>
