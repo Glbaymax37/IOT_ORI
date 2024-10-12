@@ -49,15 +49,28 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $error = $booking->evaluate($_POST);
 
     if ($error != "") {
-        echo "<div style='text-align:center;font-size:12px;color:white;background-color:grey;'>";
-        echo "<br>The following errors occurred:<br><br>";
-        echo $error;
-        echo "</div>";
+        echo "<script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    document.getElementById('errorMessage').innerHTML = '" . addslashes($error) . "';
+                    $('#errorModal').modal('show');
+                });
+              </script>";
     } else {
         // Data valid, buat booking
         $result = $booking->create_booking($id, $username, $userNIM, $userPBL, $_POST); 
-        header("Location: tables.php"); 
-        die;
+
+        // Jika ada error saat pembuatan booking, tampilkan error
+        if ($result != "") {
+            echo "<script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        document.getElementById('errorMessage').innerHTML = '" . addslashes($result) . "';
+                        $('#errorModal').modal('show');
+                    });
+                  </script>";
+        } else {
+            header("Location: tables.php"); 
+            die;
+        }
     }
 }
 
@@ -426,6 +439,26 @@ $hasil = $booking->getAllBookings();
 
     </div>
     <!-- End of Page Wrapper -->
+     <!-- Error Modal -->
+    <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="errorModalLabel">Error</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="errorMessage">
+                    <!-- Pesan error akan muncul di sini -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Scroll to Top Button-->
     <a class="scroll-to-top rounded" href="#page-top">
