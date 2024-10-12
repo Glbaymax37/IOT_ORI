@@ -13,7 +13,7 @@ class ESPData {
 
     // Fungsi untuk mengambil semua data dari ESP
     public function getAllESPData() {
-        $query = "SELECT tegangan, arus, suhu, kelembapan,  timestamp FROM sensor_data";
+        $query = "SELECT tegangan, arus, suhu, kelembapan, timestamp FROM sensor_data";
         $DB = new Database();
         return $DB->read($query); 
     }
@@ -51,11 +51,15 @@ class ESPData {
                     $updateQuery = "UPDATE data_sensor SET tegangan = '$tegangan', arus = '$arus', suhu = '$suhu', kelembapan = '$kelembapan', date = '$timestamp' 
                                     WHERE userid = '$userid' AND NAMA = '$username' AND NIM = '$userNIM'";
                     $DB->save($updateQuery);
+                    // Logging setelah update
+                    error_log("Updated data for user: $username, NIM: $userNIM at " . date('Y-m-d H:i:s'));
                 } else {
                     // Jika nama dan NIM belum ada, lakukan insert
                     $insertQuery = "INSERT INTO data_sensor (userid, NAMA, NIM, tegangan, arus, suhu, kelembapan, date) 
                                     VALUES ('$userid', '$username', '$userNIM', '$tegangan', '$arus', '$suhu', '$kelembapan', '$timestamp')";
                     $DB->save($insertQuery);
+                    // Logging setelah insert
+                    error_log("Inserted data for user: $username, NIM: $userNIM at " . date('Y-m-d H:i:s'));
                 }
             }
             return true;
@@ -70,7 +74,7 @@ class ESPData {
             $userid = $_SESSION['simalas_userid'];
     
             // Query untuk mengambil data suhu, tegangan, arus, dan daya berdasarkan userid dari session
-            $query = "SELECT suhu, tegangan, arus, daya,kelembapan FROM data_sensor WHERE userid = '$userid'";
+            $query = "SELECT suhu, tegangan, arus, kelembapan FROM data_sensor WHERE userid = '$userid'";
             $DB = new Database();
             $result = $DB->read($query); // Menggunakan metode read dari kelas Database
     
@@ -83,8 +87,6 @@ class ESPData {
             return null; // User belum login
         }
     }
-    
-    
 
     // Fungsi untuk mengambil error
     public function getError() {

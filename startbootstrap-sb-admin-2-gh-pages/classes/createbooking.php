@@ -26,12 +26,12 @@ class Booking {
 
             // Memeriksa apakah ada booking yang bertabrakan
             if ($this->isBookingConflict($tanggal, $jamBooking, $jamSelesai)) {
-                $this->error = "Jam Yang Anda Pilih Telah di BOOKING!";
+                $this->error = "Yah Jam yang kamu Pilih sudah di BOOKING<br> Silahkan Pilih Jam yang lain!!!";
                 return $this->error; 
             }
             $currentDate = date('Y-m-d');
             if (strtotime($tanggal) < strtotime($currentDate)) {
-                $this->error .= "Tanggal booking tidak valid. Harus tanggal sekarang atau setelahnya.<br>";
+                $this->error .= "Tanggal Yang kamu Pilih tidak valid / Tanggal Sudah Berlalu.<br> Biarlah Berlalu!!!";
                 return $this->error; // Kembalikan error jika ada
             }
 

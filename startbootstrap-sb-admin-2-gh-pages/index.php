@@ -335,76 +335,91 @@ else{
 
                         <script>
                             document.addEventListener("DOMContentLoaded", function () {
-        var buttonElement = document.getElementById("actionButton");
-        var transferInterval; // Variable untuk menyimpan interval
+                            var buttonElement = document.getElementById("actionButton");
+                            var transferInterval; // Variable untuk menyimpan interval
 
-        // Fungsi untuk memperbarui jam
-        function updateClock() {
-            var now = new Date();
-            var hours = now.getHours();
-            var minutes = now.getMinutes();
+                            // Fungsi untuk memperbarui jam
+                            function updateClock() {
+                                var now = new Date();
+                                var hours = now.getHours();
+                                var minutes = now.getMinutes();
 
-            console.log("Current Time:", hours, minutes); // Menampilkan waktu saat ini
+                                console.log("Current Time:", hours, minutes); // Menampilkan waktu saat ini
 
-            // Mendapatkan waktu mulai dan selesai dari PHP
-            var startHour = <?php echo $jamMulai ?>;    
-            var startMinute = <?php echo $menitMulai ?>;  
-            var endHour = <?php echo $jamUsai ?>;     
-            var endMinute = <?php echo $menitSelesai ?>;    
+                                // Mendapatkan waktu mulai dan selesai dari PHP
+                                var startHour = <?php echo $jamMulai ?>;    
+                                var startMinute = <?php echo $menitMulai ?>;  
+                                var endHour = <?php echo $jamUsai ?>;     
+                                var endMinute = <?php echo $menitSelesai ?>;    
 
-            // Aktifkan atau nonaktifkan tombol berdasarkan waktu
-            if ((hours > startHour || (hours === startHour && minutes >= startMinute)) &&
-                (hours < endHour || (hours === endHour && minutes < endMinute))) {
-                buttonElement.disabled = false; // Aktif
-            } else {
-                buttonElement.disabled = true; // Nonaktif
-                clearInterval(transferInterval); // Hentikan proses pemindahan data jika tombol nonaktif
-            }
-        }
-
-        // Fungsi untuk memulai pemindahan data
-        function startDataTransfer() {
-            transferInterval = setInterval(function () {
-                var xhr = new XMLHttpRequest();
-                xhr.open("POST", "move_data.php", true);
-                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
-                xhr.onreadystatechange = function () {
-                    if (xhr.readyState === XMLHttpRequest.DONE) {
-                        try {
-                            var response = JSON.parse(xhr.responseText);
-                            if (response.status === "success") {
-                                console.log("Data successfully moved.");
-                            } else {
-                                console.error("Data move failed.");
+                                // Aktifkan atau nonaktifkan tombol berdasarkan waktu
+                                if ((hours > startHour || (hours === startHour && minutes >= startMinute)) &&
+                                    (hours < endHour || (hours === endHour && minutes < endMinute))) {
+                                    buttonElement.disabled = false; // Aktif
+                                } else {
+                                    buttonElement.disabled = true; // Nonaktif
+                                    clearInterval(transferInterval); // Hentikan proses pemindahan data jika tombol nonaktif
+                                }
                             }
-                        } catch (e) {
-                            console.error("Error parsing JSON:", e);
-                        }
-                    }
-                };
 
-                xhr.send(); // Kirim permintaan pemindahan data
-            }, 5000); // Kirim setiap 5 detik (sesuaikan interval jika diperlukan)
-        }
+                            // Fungsi untuk memulai pemindahan data
+                            function startDataTransfer() {
+                                transferInterval = setInterval(function () {
+                                    var xhr = new XMLHttpRequest();
+                                    xhr.open("POST", "/IOT-SIMALAS/startbootstrap-sb-admin-2-gh-pages/move_data.php", true);
+                                    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
-        // Fungsi untuk menghentikan pemindahan data
-        function stopDataTransfer() {
-            clearInterval(transferInterval); // Hentikan interval
-            console.log("Data transfer stopped.");
-        }
+                                    xhr.onreadystatechange = function () {
+                                        if (xhr.readyState === XMLHttpRequest.DONE) {
+                                            try {
+                                                var response = JSON.parse(xhr.responseText);
+                                                if (response.status === "success") {
+                                                    console.log("Data successfully moved.");
+                                                } else {
+                                                    console.error("Data move failed.");
+                                                }
+                                            } catch (e) {
+                                                console.error("Error parsing JSON:", e);
+                                            }
+                                        }
+                                    };
 
-        // Menambahkan event listener ke tombol
-        buttonElement.addEventListener("click", function () {
-            if (!buttonElement.disabled) { // Pastikan tombol aktif
-                alert("Mesin diaktifkan");
-                startDataTransfer(); // Mulai proses pemindahan data
-            }
-        });
+                                    xhr.send(); // Kirim permintaan pemindahan data
+                                }, 5000); // Kirim setiap 5 detik (sesuaikan interval jika diperlukan)
+                            }
 
-        // Memperbarui jam setiap detik
-        setInterval(updateClock, 1000);
-    });                        </script>
+                            // Fungsi untuk menghentikan pemindahan data
+                            function stopDataTransfer() {
+                                clearInterval(transferInterval); // Hentikan interval
+                                console.log("Data transfer stopped.");
+                            }
+
+                            // Menambahkan event listener ke tombol
+                            buttonElement.addEventListener("click", function () {
+                                if (!buttonElement.disabled) { // Pastikan tombol aktif
+                                    // Tampilkan modal untuk memasukkan sandi
+                                    $('#activateMachineModal').modal('show');
+                                }
+                            });
+
+                            // Event listener untuk tombol konfirmasi di modal
+                            document.getElementById("activate_button").addEventListener("click", function () {
+                                var passwordInput = document.getElementById("machinePasswordInput").value;
+
+                                // Verifikasi sandi (tambahkan logika verifikasi sesuai kebutuhan Anda)
+                                if (passwordInput) {
+                                    alert("Mesin diaktifkan");
+                                    startDataTransfer(); // Mulai proses pemindahan data
+                                    $('#activateMachineModal').modal('hide'); // Sembunyikan modal
+                                } else {
+                                    alert("Harap masukkan sandi yang benar.");
+                                }
+                            });
+
+                            // Memperbarui jam setiap detik
+                            setInterval(updateClock, 1000);
+                        });                 
+                        </script>
 
                         <style>
                             #actionButton:disabled {
@@ -421,45 +436,39 @@ else{
                     <!-- Content Row -->
                     <div class="row">
 
-                        <!-- Suhu Mesin -->
+                         <!-- Suhu Mesin -->
                         <div class="col-xl-3 col-md-6 mb-4">
                             <div class="card border-left-primary shadow h-100 py-2">
                                 <div class="card-body">
                                     <div class="row no-gutters align-items-center">
                                         <div class="col mr-2">
                                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                                Temperature</div>
-                                                <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                                <?php if (!empty($data_hasil['suhu'])): ?>
-                                                <?php echo $data_hasil['suhu'] ?>&deg;C
-                                                <?php else: ?>
-                                                            Tidak ada data suhu
-                                                <?php endif; ?>
-                                                </div>
+                                                Temperature
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="temperature">
+                                                Tidak ada data suhu
+                                            </div>
                                         </div>
                                         <div class="col-auto">
-                                            <i class="fas fa-temperature-low fa-2x text-gray-300" ></i></i>
+                                            <i class="fas fa-temperature-low fa-2x text-gray-300"></i>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Voltage  -->
+                        <!-- Voltage -->
                         <div class="col-xl-3 col-md-6 mb-4">
                             <div class="card border-left-success shadow h-100 py-2">
                                 <div class="card-body">
                                     <div class="row no-gutters align-items-center">
                                         <div class="col mr-2">
                                             <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                                Voltage</div>
-                                                <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                                <?php if (!empty($data_hasil['tegangan'])): ?>
-                                                <?php echo $data_hasil['tegangan'] ?>&nbsp;V
-                                                <?php else: ?>
-                                                            Tidak ada data Tegangan
-                                                <?php endif; ?>
-                                                </div>
+                                                Voltage
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="voltage">
+                                                Tidak ada data Tegangan
+                                            </div>
                                         </div>
                                         <div class="col-auto">
                                             <i class="fas fa-bolt fa-2x text-gray-300"></i>
@@ -468,6 +477,7 @@ else{
                                 </div>
                             </div>
                         </div>
+
 
                         <!-- Time Remaining -->
                         <div class="col-xl-3 col-md-6 mb-4">
@@ -479,7 +489,7 @@ else{
                                             </div>
                                             <div class="row no-gutters align-items-center">
                                                 <div class="col-auto">
-                                                <div class="h5 mb-0 font-weight-bold text-gray-800">2&nbsp;h&nbsp;30&nbsp;m </div>
+                                                <div class="h5 mb-0 font-weight-bold text-gray-800" id="Time Remaining">2&nbsp;h&nbsp;30&nbsp;m </div>
 
                                                 </div>
                                                 <div class="col">
@@ -517,6 +527,43 @@ else{
                             </div>
                         </div>
                     </div>
+                    
+                       <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                            <script>
+                                function fetchSensorData() {
+                                    $.ajax({
+                                        url: 'fetch_sensor.php', // Pastikan path ini benar
+                                        type: 'GET',
+                                        dataType: 'json',
+                                        success: function(data) {
+                                            // Update elemen suhu
+                                            if (data.Suhu) {
+                                                $('#temperature').html(data.Suhu + '&deg;C');
+                                            } else {
+                                                $('#temperature').html('Tidak ada data suhu');
+                                            }
+
+                                            // Update elemen tegangan
+                                            if (data.Tegangan) {
+                                                $('#voltage').html(data.Tegangan + ' V');
+                                            } else {
+                                                $('#voltage').html('Tidak ada data Tegangan');
+                                            }
+
+                                            // Update elemen lainnya jika perlu
+                                        },
+                                        error: function(xhr, status, error) {
+                                            console.error('AJAX Error: ' + status + error);
+                                        }
+                                    });
+                                }
+
+                                setInterval(fetchSensorData, 1000);
+
+                                $(document).ready(function() {
+                                    fetchSensorData();
+                                });
+                            </script>
 
                     <!-- Content Row -->
 
@@ -566,10 +613,37 @@ else{
     </div>
     <!-- End of Page Wrapper -->
 
+
+        <div class="modal fade" id="activateMachineModal" tabindex="-1" role="dialog" aria-labelledby="activateMachineLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="activateMachineLabel">Aktifkan Mesin</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Masukkan sandi Anda untuk mengaktifkan mesin.</p>
+                    <div class="form-group">
+                        <label for="machinePasswordInput">Sandi</label>
+                        <input type="password" class="form-control" id="machinePasswordInput" placeholder="Masukkan sandi">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>
+                    <button class="btn btn-primary" id="activate_button">Aktifkan Mesin</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <!-- Scroll to Top Button-->
     <a class="scroll-to-top rounded" href="#page-top">
         <i class="fas fa-angle-up"></i>
     </a>
+
 
 <!-- Logout Modal-->
         <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
