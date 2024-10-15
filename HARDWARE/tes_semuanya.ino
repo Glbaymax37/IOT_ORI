@@ -10,26 +10,35 @@
 #define DHTTYPE DHT11
 #define SSR_PIN 12 // Pin D6
 
-const char* ssid = "Donita";
-const char* password = "204donita834";
-const char* server_url = "http://192.168.1.7";  // Ubah ini ke URL server Anda
+const char* ssid = "Pro";
+const char* password = "12345678";
+const char* server_url = "http://192.168.145.223";  // Ubah ini ke URL server Anda
 
 PZEM004Tv30 pzem(13, 15); // D7, D8 for Pzem-004T
 DHT dht(DHTPIN, DHTTYPE);
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 WiFiClient wifiClient;
+HTTPClient http;
 
 float Dia = 0.03286;  // Diameter roda counter (dalam meter)
 int CPR = 10;  // Jumlah pickup pada roda counter
+float FullRoll = 330.0;  // Panjang standar satu spool filament (dalam meter)
+float Remaining = 330.0;  // Panjang filament yang tersisa
 float Used = 0.0, OldUsed = 0.0;
+float LowLevelLimit = 5.0;  // Batas panjang filament rendah
+
 long newPosition = 0;
 long oldPosition = -999;
 long Click = 0;
 unsigned long LowTime = 0;
+unsigned long LowLevelAlarm = 0;
 
+bool ssrState = false; // Status SSR, false = OFF, true = ON
 bool Saved = false;
 bool Started = false;
 bool Low = false;
+bool LowLevel = false;
+bool LevelLimit = false;
 
 void DrawHeader() {
   lcd.clear();
@@ -59,7 +68,7 @@ void loop() {
     float tegangan = pzem.voltage();
     float arus = pzem.current();
     float daya = pzem.power();
-    float energi = pzem.energy();  // Pengukuran energi (kWh)
+    float energi = pzem.energy();
     float suhu = dht.readTemperature();
     float kelembapan = dht.readHumidity();
 
@@ -111,6 +120,10 @@ void loop() {
     Serial.print(kelembapan);
     Serial.println(" %");
 
+    if ((Used - OldUsed) > 1.0) {
+      OldUsed = Used;
+      EEPROM.put(0, Remaining);
+    }
     // Jika sinyal rendah, mulai pengukuran waktu
     if (digitalRead(CNT_PIN) == LOW) {
       LowTime = millis();
@@ -124,25 +137,35 @@ void loop() {
         LowTime = millis();
         Click++;
         Used += (Dia * 3.1415927) / CPR;  // Perhitungan dalam meter
+        Remaining -= (Dia * 3.1415927) / CPR;  // Mengurangi panjang filament yang tersisa
         lcd.clear();
         lcd.setCursor(0, 1);
         lcd.print("Used: ");
         lcd.print(Used, 2);
         lcd.print(" m");
+        delay(2000);
+        lcd.clear();
+        lcd.setCursor(0, 1);
+        lcd.print("Sisa Filament: ");
+        lcd.print(Remaining, 2);
+        lcd.print(" m");
+        delay(2000);
         // Menampilkan data pada Serial Monitor
         Serial.print("Panjang Filament yang Digunakan: ");
         Serial.print(Used, 2);
+        Serial.println(" meter");
+        Serial.print("Panjang Filament yang Tersisa: ");
+        Serial.print(Remaining, 2);
         Serial.println(" meter");
       }
     }
 
     if (!isnan(tegangan) && !isnan(arus) && !isnan(daya) && !isnan(energi) && !isnan(suhu) && !isnan(kelembapan)) {
-      HTTPClient http;
-      String postData = "tegangan=" + String(tegangan) + "&arus=" + String(arus) + "&daya=" + String(daya) + "&energi=" + String(energi) + "&suhu=" + String(suhu) + "&kelembapan=" + String(kelembapan) + "&used=" + String(Used, 2);
+      String postData = "tegangan=" + String(tegangan) + "&arus=" + String(arus) + "&daya=" + String(daya) + "&energi=" + String(energi) + "&suhu=" + String(suhu) + "&kelembapan=" + String(kelembapan) + "&used=" + String(Used, 2) + "&remaining=" + String(Remaining, 2);
 
       Serial.println("POST Data: " + postData);  // Debug data yang dikirim
 
-      http.begin(wifiClient, String(server_url) + "/iot/submit_data.php");
+      http.begin(wifiClient, String(server_url) + "/IOT-SIMALAS/IOT-SIMALAS/HARDWARE/submit_data.php");
       http.addHeader("Content-Type", "application/x-www-form-urlencoded");
       int httpResponseCode = http.POST(postData);
 
@@ -159,7 +182,6 @@ void loop() {
     }
 
     // Fetch the SSR status and handle the timer from the server
-    HTTPClient http;
     http.begin(wifiClient, String(server_url) + "/iot/get_ssr_status.php");
     int httpResponseCode = http.GET();
     if (httpResponseCode > 0) {
