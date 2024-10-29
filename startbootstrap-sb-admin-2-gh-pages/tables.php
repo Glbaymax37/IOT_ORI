@@ -117,7 +117,7 @@ $hasil = $booking->getAllBookings();
             <!-- Sidebar - Brand -->
             <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.php">
                 <div class="sidebar-brand-icon rotate-n-15">
-                    <i class="fas fa-laugh-wink"></i>
+                <img src="https://glatinone.github.io/barelangmrt.github.io/assets/img/BRAIL.png" alt="Logo" style="width:30px; height:auto; margin-right:10px;">
                 </div>
                 <div class="sidebar-brand-text mx-3">IOT SIMALAS <sup></sup></div>
             </a>

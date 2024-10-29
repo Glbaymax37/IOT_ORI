@@ -82,7 +82,7 @@ else{
             <!-- Sidebar - Brand -->
             <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.php">
                 <div class="sidebar-brand-icon rotate-n-15">
-                    <i class="fas fa-laugh-wink"></i>
+                <img src="https://glatinone.github.io/barelangmrt.github.io/assets/img/BRAIL.png" alt="Logo" style="width:30px; height:auto; margin-right:10px;">
                 </div>
                 <div class="sidebar-brand-text mx-3">IOT SIMALAS <sup></sup></div>
             </a>
@@ -307,16 +307,10 @@ else{
                                             </div>
                                             <div class="row no-gutters align-items-center">
                                                 <div class="col-auto">
-                                                <div class="h5 mb-0 font-weight-bold text-gray-800">2&nbsp;h&nbsp;30&nbsp;m </div>
+                                                <div class="h5 mb-0 font-weight-bold text-gray-800"id="time_remaining">Memuat...</div>
 
                                                 </div>
-                                                <div class="col">
-                                                    <div class="progress progress-sm mr-2"style="margin-left: 10px;">
-                                                        <div class="progress-bar bg-info" role="progressbar"
-                                                            style="width: 50%" aria-valuenow="50" aria-valuemin="0"
-                                                            aria-valuemax="100"></div>
-                                                    </div>
-                                                </div>
+    
                                             </div>
                                         </div>
                                         <div class="col-auto">
@@ -374,6 +368,83 @@ else{
                                 </div>
                             </div>
                         </div>
+
+
+                        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                            <script>
+                                function fetchSensorData() {
+                                    $.ajax({
+                                        url: 'fetch_sensor.php', // Pastikan path ini benar
+                                        type: 'GET',
+                                        dataType: 'json',
+                                        success: function(data) {
+                                            console.log(data); // Debugging
+
+                                            // Update elemen suhu
+                                            if (data.Suhu) {
+                                                $('#temperature').html(data.Suhu + '&deg;C');
+                                            } else {
+                                                $('#temperature').html('Tidak ada data suhu');
+                                            }
+
+                                            // Update elemen tegangan
+                                            if (data.Tegangan) {
+                                                $('#voltage').html(data.Tegangan + ' V');
+                                            } else {
+                                                $('#voltage').html('Tidak ada data Tegangan');
+                                            }
+                                        },
+                                        error: function(xhr, status, error) {
+                                            console.error('AJAX Error: ' + xhr.status + ' - ' + error);
+                                            alert('Terjadi kesalahan: ' + xhr.status + ' - ' + error);
+                                        }
+                                    });
+                                }
+
+                                function fetchTimeRemaining() {
+                                    $.ajax({
+                                        url: 'fetch_time.php', // URL ke file PHP yang kita buat
+                                        type: 'GET',
+                                        dataType: 'json',
+                                        success: function(data) {
+                                            console.log(data); // Debugging
+
+                                            // Update elemen time remaining
+                                            if (data.status === 'ongoing') {
+                                                $('#time_remaining').html(data.time_remaining); // Menampilkan waktu tersisa
+                                            } else if (data.status === 'completed') {
+                                                $('#time_remaining').html('Booking sudah selesai'); // Jika booking selesai
+                                            } else {
+                                                $('#time_remaining').html('' + data.message); // Jika terjadi kesalahan
+                                            }
+
+                                            // Tampilkan waktu server
+                                            $('#server_time').html('Waktu Server: ' + data.server_time); // Pastikan ada elemen dengan ID server_time
+                                        },
+                                        error: function(xhr, status, error) {
+                                            console.error('AJAX Error: ' + xhr.status + ' - ' + error);
+                                            alert('Terjadi kesalahan: ' + xhr.status + ' - ' + error);
+                                        }
+                                    });
+                                }
+
+
+                                $(document).ready(function() {
+                                    fetchSensorData(); // Memanggil fungsi pertama kali saat halaman dimuat
+                                    fetchTimeRemaining(); // Memanggil fungsi pertama kali saat halaman dimuat
+                                    setInterval(fetchSensorData, 1000); // Memperbarui data sensor setiap detik
+                                    setInterval(fetchTimeRemaining, 1000); // Memperbarui waktu setiap detik
+                                });
+                            </script>
+
+
+
+
+
+
+
+
+
 
                     </div>
                     <hr>

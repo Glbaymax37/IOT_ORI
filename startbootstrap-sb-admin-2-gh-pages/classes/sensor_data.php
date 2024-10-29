@@ -84,13 +84,48 @@ class ESPData {
                 return null; // Tidak ada data sensor
             }
         } else {
+
+            
             return null; // User belum login
         }
     }
 
-    // Fungsi untuk mengambil error
+   
     public function getError() {
         return $this->error;
     }
+    public function updateSSRStatus($status) {
+    session_start(); // Ensure session is started
+
+    // Validate status (e.g., can only be "ON" or "OFF")
+    if (!in_array($status, ['ON', 'OFF'])) {
+        $this->error .= "Invalid status value.<br>";
+        return false;
+    }
+
+    // Retrieve user ID from session
+    if (isset($_SESSION["simalas_userid"])) {
+        $userid = $_SESSION["simalas_userid"];
+    } else {
+        $this->error .= "Session data is missing.<br>";
+        return false;
+    }
+
+    // If the status is not set, use the default value "OFF"
+    if (empty($status)) {
+        $status = 'OFF'; // Set default status to OFF
+    }
+
+    // Update SSR status in database
+    $query = "UPDATE Statusmesin SET status = ? WHERE userid = '$userid";
+    $DB = new Database();
+
+    if ($DB->save($query, [$status, $userid])) {
+        return true; 
+    } else {
+        $this->error .= "Error updating status: ";
+        return false; 
+    }
+}
 }
 ?>

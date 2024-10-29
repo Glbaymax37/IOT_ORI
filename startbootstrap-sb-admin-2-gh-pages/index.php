@@ -84,7 +84,7 @@ else{
             <!-- Sidebar - Brand -->
             <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.php">
                 <div class="sidebar-brand-icon rotate-n-15">
-                    <i class="fas fa-laugh-wink"></i>
+                <img src="https://glatinone.github.io/barelangmrt.github.io/assets/img/BRAIL.png" alt="Logo" style="width:30px; height:auto; margin-right:10px;">
                 </div>
                 <div class="sidebar-brand-text mx-3">IOT SIMALAS <sup></sup></div>
             </a>
@@ -215,8 +215,22 @@ else{
 
                                 var timeString = hours + ':' + minutes + ':' + seconds;
                                 document.getElementById('timeDisplay').textContent = timeString;
+
+                                var xhr = new XMLHttpRequest();
+                                xhr.open("POST", "fetch_time.php", true);
+                                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                                xhr.onreadystatechange = function () {
+                                    if (xhr.readyState === XMLHttpRequest.DONE) {
+                                        var response = JSON.parse(xhr.responseText);
+                                        console.log(response);
+                                    }
+                                };
+                                xhr.send("client_time=" + timeString);
+
+
                             }
                             setInterval(updateTime, 1000);
+                            setInterval(sendTimeToServer, 1000);
                         </script>
 
                         <div class="topbar-divider d-none d-sm-block"></div>
@@ -250,12 +264,7 @@ else{
                 <!-- Begin Page Content -->
                 <div class="container-fluid">
 
-                    <!-- Page Heading -->
-                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                        <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
-                        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                                class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
-                    </div>
+                    
 
                      <!-- PROFIL -->
                      <div class="card shadow mb-4">
@@ -366,6 +375,7 @@ else{
                             function startDataTransfer() {
                                 transferInterval = setInterval(function () {
                                     var xhr = new XMLHttpRequest();
+                                    var ssrStatus = "OFF";
                                     xhr.open("POST", "/IOT-SIMALAS/startbootstrap-sb-admin-2-gh-pages/move_data.php", true);
                                     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
@@ -388,10 +398,15 @@ else{
                                 }, 5000); // Kirim setiap 5 detik (sesuaikan interval jika diperlukan)
                             }
 
-                            // Fungsi untuk menghentikan pemindahan data
+                            
                             function stopDataTransfer() {
                                 clearInterval(transferInterval); // Hentikan interval
                                 console.log("Data transfer stopped.");
+                            }
+                            function updateSSRStatus(newStatus) {
+                                ssrStatus = newStatus; // Update status
+                                console.log("SSR Status Updated to:", ssrStatus);
+                                
                             }
 
                             // Menambahkan event listener ke tombol
@@ -409,9 +424,11 @@ else{
                                 // Verifikasi sandi (tambahkan logika verifikasi sesuai kebutuhan Anda)
                                 if (passwordInput) {
                                     alert("Mesin diaktifkan");
+                                    updateSSRStatus("ON");
                                     startDataTransfer(); // Mulai proses pemindahan data
                                     $('#activateMachineModal').modal('hide'); // Sembunyikan modal
                                 } else {
+                                    updateSSRStatus("OFF");
                                     alert("Harap masukkan sandi yang benar.");
                                 }
                             });
@@ -489,15 +506,11 @@ else{
                                             </div>
                                             <div class="row no-gutters align-items-center">
                                                 <div class="col-auto">
-                                                <div class="h5 mb-0 font-weight-bold text-gray-800" id="Time Remaining">2&nbsp;h&nbsp;30&nbsp;m </div>
+                                                <div class="h5 mb-0 font-weight-bold text-gray-800" id="time_remaining">Memuat...</div>
 
                                                 </div>
                                                 <div class="col">
-                                                    <div class="progress progress-sm mr-2"style="margin-left: 10px;">
-                                                        <div class="progress-bar bg-info" role="progressbar"
-                                                            style="width: 50%" aria-valuenow="50" aria-valuemin="0"
-                                                            aria-valuemax="100"></div>
-                                                    </div>
+                                              
                                                 </div>
                                             </div>
                                         </div>
@@ -517,7 +530,7 @@ else{
                                         <div class="col mr-2">
                                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                                             Length of Filament Used</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">20&nbsp;cm</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="filament">20&nbsp;cm</div>
                                         </div>
                                         <div class="col-auto">
                                             <i class="fas fa-ruler fa-2x text-gray-300"></i>
@@ -528,7 +541,7 @@ else{
                         </div>
                     </div>
                     
-                       <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
                             <script>
                                 function fetchSensorData() {
                                     $.ajax({
@@ -536,6 +549,8 @@ else{
                                         type: 'GET',
                                         dataType: 'json',
                                         success: function(data) {
+                                            console.log(data); // Debugging
+
                                             // Update elemen suhu
                                             if (data.Suhu) {
                                                 $('#temperature').html(data.Suhu + '&deg;C');
@@ -549,22 +564,49 @@ else{
                                             } else {
                                                 $('#voltage').html('Tidak ada data Tegangan');
                                             }
-
-                                            // Update elemen lainnya jika perlu
                                         },
                                         error: function(xhr, status, error) {
-                                            console.error('AJAX Error: ' + status + error);
+                                            console.error('AJAX Error: ' + xhr.status + ' - ' + error);
+                                            alert('Terjadi kesalahan: ' + xhr.status + ' - ' + error);
                                         }
                                     });
                                 }
 
-                                setInterval(fetchSensorData, 1000);
+                                function fetchTimeRemaining() {
+                                    $.ajax({
+                                        url: 'fetch_time.php', // URL ke file PHP yang kita buat
+                                        type: 'GET',
+                                        dataType: 'json',
+                                        success: function(data) {
+                                            console.log(data); // Debugging
+
+                                            // Update elemen time remaining
+                                            if (data.status === 'ongoing') {
+                                                $('#time_remaining').html(data.time_remaining); // Menampilkan waktu tersisa
+                                            } else if (data.status === 'completed') {
+                                                $('#time_remaining').html('Booking sudah selesai'); // Jika booking selesai
+                                            } else {
+                                                $('#time_remaining').html('' + data.message); // Jika terjadi kesalahan
+                                            }
+
+                                            // Tampilkan waktu server
+                                            $('#server_time').html('Waktu Server: ' + data.server_time); // Pastikan ada elemen dengan ID server_time
+                                        },
+                                        error: function(xhr, status, error) {
+                                            console.error('AJAX Error: ' + xhr.status + ' - ' + error);
+                                            alert('Terjadi kesalahan: ' + xhr.status + ' - ' + error);
+                                        }
+                                    });
+                                }
+
 
                                 $(document).ready(function() {
-                                    fetchSensorData();
+                                    fetchSensorData(); // Memanggil fungsi pertama kali saat halaman dimuat
+                                    fetchTimeRemaining(); // Memanggil fungsi pertama kali saat halaman dimuat
+                                    setInterval(fetchSensorData, 1000); // Memperbarui data sensor setiap detik
+                                    setInterval(fetchTimeRemaining, 1000); // Memperbarui waktu setiap detik
                                 });
                             </script>
-
                     <!-- Content Row -->
 
                     <div class="row">
