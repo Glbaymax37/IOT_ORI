@@ -14,9 +14,9 @@ if (isset($_SESSION["simalas_userid"]) && is_numeric($_SESSION["simalas_userid"]
 
     // Memeriksa apakah data berhasil dipindahkan
     if ($data === false) {
-        echo json_encode(["status" => "error", "message" => "Failed to fetch data."]);
+        echo json_encode(["status" => "error", "message" => $data_mentah->getError()]);
     } else {
-        echo json_encode(["status" => "success", "data" => $data]);
+        echo json_encode(["status" => "success", "data" => true]);
     }
 } else {
     echo json_encode(["status" => "error", "message" => "User not logged in."]);

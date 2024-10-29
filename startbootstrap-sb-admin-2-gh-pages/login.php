@@ -1,6 +1,7 @@
 <?php
 session_start();
 
+
 include("classes/connect.php");
 include("classes/login.php");
 
@@ -54,6 +55,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     <div class="container">
 
+        
+        <style>
+                /* CSS untuk menempatkan gambar di tengah dengan margin bawah */
+            .bg-login-image {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100%;
+            }
+
+            .bg-login-image img {
+                max-width: 100%;
+                height: auto;
+                margin-top: 80px; /* Tambahkan margin atas untuk menggeser gambar ke bawah */
+            }
+
+        </style>
+
         <!-- Outer Row -->
         <div class="row justify-content-center">
 
@@ -63,8 +82,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <div class="card-body p-0">
                         <!-- Nested Row within Card Body -->
                         <div class="row">
-                            <div class="col-lg-6 d-none d-lg-block bg-login-image"></div>
-                            <div class="col-lg-6">
+                            <div class="col-lg-6 d-none d-lg-block bg-login-image">
+                            <img src="https://www.oneeducation.org.uk/wp-content/uploads/2020/02/Hero-Illustration.png" alt="Login Image" style="width:100%; height:auto;">
+
+                            </div>
+                            <div class="col-lg-6"> 
                                 <div class="p-5">
                                     <div class="text-center">
                                         <h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
