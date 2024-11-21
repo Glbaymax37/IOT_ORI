@@ -51,9 +51,7 @@ else{
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -333,18 +331,38 @@ else{
                                 echo "Tidak ada data booking.";
                             }
                             ?>
+                   <div class="col-lg-2 mb-4">
+                    <button class="card bg-success text-white shadow" id="actionButton" style="border: none; width: 100%; padding: 15px; text-align: left;" data-toggle="modal" data-target="#activateMachineModal">
+                        Aktifkan Mesin
+                    </button>
+                </div>
+                <!-- Modal untuk memasukkan kata sandi -->
+                <div class="modal fade" id="activateMachineModal" tabindex="-1" role="dialog" aria-labelledby="activateMachineLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="activateMachineLabel">Aktifkan Mesin</h5>
+                                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">×</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Masukkan sandi Anda untuk mengaktifkan mesin.</p>
+                                <div class="form-group">
+                                    <label for="machinePasswordInput">Sandi</label>
+                                    <input type="password" class="form-control" id="machinePasswordInput" placeholder="Masukkan sandi">
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>
+                                <button class="btn btn-primary" id="activate_button">Aktifkan Mesin</button>
+                            </div>
+                        </div>
                     </div>
-                        <div class="col-lg-2 mb-4">
-                            <button class="card bg-success text-white shadow" id="actionButton" style="border: none; width: 100%; padding: 15px; text-align: left;" disabled>
-                                Aktifkan Mesin
-                        <div class="text-white-50 small"></div>
-                            </button>
-                            
-                    </div>
-
-                        <script>
-                            document.addEventListener("DOMContentLoaded", function () {
-                            var buttonElement = document.getElementById("actionButton");
+                </div>
+                <script>
+                         document.addEventListener("DOMContentLoaded", function () {
+                            var machine = false; // Status mesin, mulai dari OFF
                             var transferInterval; // Variable untuk menyimpan interval
 
                             // Fungsi untuk memperbarui jam
@@ -353,8 +371,6 @@ else{
                                 var hours = now.getHours();
                                 var minutes = now.getMinutes();
 
-                                console.log("Current Time:", hours, minutes); // Menampilkan waktu saat ini
-
                                 // Mendapatkan waktu mulai dan selesai dari PHP
                                 var startHour = <?php echo $jamMulai ?>;    
                                 var startMinute = <?php echo $menitMulai ?>;  
@@ -362,12 +378,17 @@ else{
                                 var endMinute = <?php echo $menitSelesai ?>;    
 
                                 // Aktifkan atau nonaktifkan tombol berdasarkan waktu
+                                var buttonElement = document.getElementById("actionButton"); // Mendapatkan elemen tombol
                                 if ((hours > startHour || (hours === startHour && minutes >= startMinute)) &&
                                     (hours < endHour || (hours === endHour && minutes < endMinute))) {
                                     buttonElement.disabled = false; // Aktif
                                 } else {
-                                    buttonElement.disabled = true; // Nonaktif
-                                    clearInterval(transferInterval); // Hentikan proses pemindahan data jika tombol nonaktif
+                                    if (machine) {
+                                        console.log("Waktu habis"); // Tambahkan log
+                                        updateMachineStatus("OFF"); // Kirim status OFF 
+                                        machine = false; // Set status mesin menjadi OFF
+                                    }
+                                    buttonElement.disabled = true; // Nonaktifkan tombol
                                 }
                             }
 
@@ -375,8 +396,7 @@ else{
                             function startDataTransfer() {
                                 transferInterval = setInterval(function () {
                                     var xhr = new XMLHttpRequest();
-                                    var ssrStatus = "OFF";
-                                    xhr.open("POST", "/IOT-SIMALAS/startbootstrap-sb-admin-2-gh-pages/move_data.php", true);
+                                    xhr.open("POST", "move_data.php", true);
                                     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
                                     xhr.onreadystatechange = function () {
@@ -395,49 +415,57 @@ else{
                                     };
 
                                     xhr.send(); // Kirim permintaan pemindahan data
-                                }, 5000); // Kirim setiap 5 detik (sesuaikan interval jika diperlukan)
+                                }, 2000); // Kirim setiap 5 detik
                             }
 
-                            
                             function stopDataTransfer() {
                                 clearInterval(transferInterval); // Hentikan interval
                                 console.log("Data transfer stopped.");
                             }
-                            function updateSSRStatus(newStatus) {
-                                ssrStatus = newStatus; // Update status
-                                console.log("SSR Status Updated to:", ssrStatus);
+
+                            // Fungsi untuk mengirim status ke server
+                            function updateMachineStatus(statusmesin) {
+                                console.log("Status yang akan dikirim: " + statusmesin); // Tambahkan log
+                                var xhr = new XMLHttpRequest();
+                                xhr.open("POST", "update_ssr_status.php", true);
+                                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                                 
+                                xhr.onreadystatechange = function () {
+                                    if (xhr.readyState === XMLHttpRequest.DONE) {   
+                                        console.log("Respons dari server:", xhr.responseText); // Tambahkan log untuk respons mentah
+                                        try {
+                                            var response = JSON.parse(xhr.responseText);
+                                            console.log(response); // Tambahkan log untuk melihat respons
+                                            alert(response.message); // Tampilkan pesan dari server
+                                        } catch (e) {
+                                            console.error("Error parsing JSON:", e);
+                                            alert("Terjadi kesalahan saat memproses respons dari server.");
+                                        }
+                                    }
+                                };
+                                
+                                xhr.send("statusmesin=" + statusmesin); // Kirim status
                             }
-
-                            // Menambahkan event listener ke tombol
-                            buttonElement.addEventListener("click", function () {
-                                if (!buttonElement.disabled) { // Pastikan tombol aktif
-                                    // Tampilkan modal untuk memasukkan sandi
-                                    $('#activateMachineModal').modal('show');
-                                }
-                            });
-
-                            // Event listener untuk tombol konfirmasi di modal
+                            // Menambahkan event listener ke tombol aktivasi mesin
                             document.getElementById("activate_button").addEventListener("click", function () {
                                 var passwordInput = document.getElementById("machinePasswordInput").value;
 
-                                // Verifikasi sandi (tambahkan logika verifikasi sesuai kebutuhan Anda)
+                                // Lakukan validasi password di sini jika diperlukan
                                 if (passwordInput) {
-                                    alert("Mesin diaktifkan");
-                                    updateSSRStatus("ON");
-                                    startDataTransfer(); // Mulai proses pemindahan data
+                                    startDataTransfer();
+                                    updateMachineStatus("ON");
                                     $('#activateMachineModal').modal('hide'); // Sembunyikan modal
+                                    machine = true; // Set status mesin menjadi ON
                                 } else {
-                                    updateSSRStatus("OFF");
-                                    alert("Harap masukkan sandi yang benar.");
+                                    alert("Silakan masukkan kata sandi yang benar."); // Peringatan jika password tidak dimasukkan
                                 }
                             });
 
                             // Memperbarui jam setiap detik
                             setInterval(updateClock, 1000);
-                        });                 
+                        });
                         </script>
-
+    
                         <style>
                             #actionButton:disabled {
                                 background-color: gray;
@@ -655,30 +683,6 @@ else{
     </div>
     <!-- End of Page Wrapper -->
 
-
-        <div class="modal fade" id="activateMachineModal" tabindex="-1" role="dialog" aria-labelledby="activateMachineLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="activateMachineLabel">Aktifkan Mesin</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p>Masukkan sandi Anda untuk mengaktifkan mesin.</p>
-                    <div class="form-group">
-                        <label for="machinePasswordInput">Sandi</label>
-                        <input type="password" class="form-control" id="machinePasswordInput" placeholder="Masukkan sandi">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>
-                    <button class="btn btn-primary" id="activate_button">Aktifkan Mesin</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
 
     <!-- Scroll to Top Button-->
