@@ -94,11 +94,11 @@ class ESPData {
     public function getError() {
         return $this->error;
     }
-    public function updateSSRStatus($statusmesin) {
+    public function updateSSRStatus($status) {
     session_start(); // Ensure session is started
 
     // Validate status (e.g., can only be "ON" or "OFF")
-    if (!in_array($statusmesin, ['ON', 'OFF'])) {
+    if (!in_array($status, ['ON', 'OFF'])) {
         $this->error .= "Invalid status value.<br>";
         return false;
     }
@@ -112,15 +112,15 @@ class ESPData {
     }
 
     // If the status is not set, use the default value "OFF"
-    if (empty($statusmesin)) {
-        $statusmesin = 'OFF'; // Set default status to OFF
+    if (empty($status)) {
+        $status = 'OFF'; // Set default status to OFF
     }
 
     // Update SSR status in database
-    $query = "UPDATE statusmesin SET statusmesin = ? WHERE userid = '$userid";
+    $query = "UPDATE Statusmesin SET status = ? WHERE userid = '$userid";
     $DB = new Database();
 
-    if ($DB->save($query, [$statusmesin, $userid])) {
+    if ($DB->save($query, [$status, $userid])) {
         return true; 
     } else {
         $this->error .= "Error updating status: ";
